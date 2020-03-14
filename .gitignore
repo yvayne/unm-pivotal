@@ -1,0 +1,10 @@
+/.allure/
+/.gradle/
+/.idea/
+/build/
+/classes/
+/logs/
+/out/
+/allure-results/
+*.iml
+/src/main/java/org/

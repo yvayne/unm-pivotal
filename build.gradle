@@ -1,0 +1,95 @@
+plugins {
+    id "io.qameta.allure" version "2.5"
+}
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'pmd'
+
+//group 'org.example'
+
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.11.0'
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    compile group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '3.8.1'
+    testCompile group: 'io.cucumber', name: 'cucumber-java', version: '2.4.0'
+    testCompile group: 'io.cucumber', name: 'cucumber-testng', version: '2.4.0'
+    testCompile group: 'io.cucumber', name: 'cucumber-picocontainer', version: '2.4.0'
+    testCompile group: 'io.qameta.allure', name: 'allure-cucumber2-jvm', version: '2.6.0'
+    testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+}
+// allure configuration
+allure {
+    version = '2.6.0'
+    autoconfigure = true
+}
+
+// Checkstyle configuration
+checkstyle {
+    toolVersion = '8.9'
+}
+
+// FindBugs configuration
+findbugs {
+    toolVersion = '3.0.1'
+}
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+// PMD configuration
+pmd {
+    ruleSets = ["java-basic", "java-braces", "java-unnecessary", "java-unusedcode", "java-strictexception"]
+    toolVersion = '6.0.0'
+}
+tasks.withType(Pmd) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+task executeFeatures(type: Test) {
+    doFirst {
+        useTestNG()
+        options {
+            useDefaultListeners = false
+            jvmArgs = ['-Dcucumber.options= ' +
+                               '--glue org.unm.pivotal ' +
+                               '--plugin pretty ' +
+                               '--plugin io.qameta.allure.cucumber2jvm.AllureCucumber2Jvm ' + cucumberOptions]
+//            jvmArgs = ['-DUser=' + user]
+//            jvmArgs = ['-DPassword=' + password]
+//            jvmArgs = ['-DAPIToken=' + APIToken]
+//            jvmArgs = ['-Dbrowser=' + browser]
+//
+//            jvmArgs = ['-DUserName=' + remoteUserName]
+//            jvmArgs = ['-DKey=' + remoteAccessKey]
+//            jvmArgs = ['-DremoteBrowser=' + remoteBrowserName]
+//            jvmArgs = ['-DOSVersion=' + remoteOS]
+//            jvmArgs = ['-DremotePlatform=' + remotePlatform]
+//            jvmArgs = ['-DremoteResolution=' + remoteResolution]
+//            jvmArgs = ['-DdockerUrl=' + dockerURL]
+//            jvmArgs = ['-DexplicitWait=' + explicitWait]
+        }
+        testLogging.showStandardStreams = true
+        scanForTestClasses = false
+        ignoreFailures = false
+        reports.html.enabled = false
+    }
+    if (generateReport.toBoolean()) {
+        finalizedBy 'allureReport'
+    }
+}
